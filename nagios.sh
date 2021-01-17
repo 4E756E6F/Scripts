@@ -12,8 +12,8 @@ sudo usermod -a -G nagcmd nagios
 sudo usermod -a -G nagcmd www-data
 echo "[INFO]  Installing Nagios Core Service"
 cd /opt/
-wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.4.6.tar.gz
-tar -xvf nagios-4.4.6.tar.gz
+sudo wget https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.4.6.tar.gz
+sudo tar -xvf nagios-4.4.6.tar.gz
 cd nagios-4.4.6
 sudo ./configure --with-command-group=nagcmd
 sudo make all
@@ -26,7 +26,7 @@ sudo make install-exfoliation
 cp -R contrib/eventhandlers/ /usr/local/nagios/libexec/
 chown -R nagios:nagios /usr/local/nagios/libexec/eventhandlers
 echo "[INFO] Setting up Apache with Authentication"
-cat >> /etc/apache2/conf-available/nagios.conf << EOL
+sudo cat >> /etc/apache2/conf-available/nagios.conf << EOL
 ScriptAlias /nagios/cgi-bin "/usr/local/nagios/sbin"
 
 <Directory "/usr/local/nagios/sbin">
@@ -53,20 +53,20 @@ Alias /nagios "/usr/local/nagios/share"
    Require valid-user
 </Directory>
 EOL
-htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
+sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin
 sudo a2enconf nagios
 sudo a2enmod cgi rewrite
 sudo service apache2 restart
 echo "[INFO] Installing Nagios Plugins"
 cd /opt
-wget http://www.nagios-plugins.org/download/nagios-plugins-2.2.1.tar.gz
-tar -xvf nagios-plugins-2.2.1.tar.gz
+sudo wget http://www.nagios-plugins.org/download/nagios-plugins-2.2.1.tar.gz
+sudo tar -xvf nagios-plugins-2.2.1.tar.gz
 cd nagios-plugins-2.2.1
 sudo ./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl
 sudo make
 sudo make install
 echo "[INFO] Verifing Settings"
-/usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
 sudo systemctl start nagios
 sudo systemctl enable nagios
 echo 'ALL DONE!!!'
