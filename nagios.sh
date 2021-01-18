@@ -23,8 +23,8 @@ sudo make install-daemoninit
 sudo make install-config
 sudo make install-commandmode
 sudo make install-exfoliation
-cp -R contrib/eventhandlers/ /usr/local/nagios/libexec/
-chown -R nagios:nagios /usr/local/nagios/libexec/eventhandlers
+sudo cp -R contrib/eventhandlers/ /usr/local/nagios/libexec/
+sudo chown -R nagios:nagios /usr/local/nagios/libexec/eventhandlers
 echo "[INFO] Setting up Apache with Authentication"
 sudo cat >> /etc/apache2/conf-available/nagios.conf << EOL
 ScriptAlias /nagios/cgi-bin "/usr/local/nagios/sbin"
