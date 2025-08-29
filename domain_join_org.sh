@@ -13,45 +13,36 @@ while getopts "u:d:n:" opt; do
     esac
 done
 
-if [[ -z "$NUMBER" || -z "$DOMAIN" || -z "$ADMUSER" ]]; then
-    echo "Error: you must specify -u <admin> -d <domain> -n <number of users>" >&2
-    exit 1
-fi
-
-echo "Tell me the usernames that should have access to the machine:"
-usernames=""
+echo "Tell me the usernames, that should have access tot he machine"
 for ((i=1; i<=NUMBER; i++)); do
     read -p "Username #$i: " username
+    
     if [[ -z "$usernames" ]]; then
         usernames="$username"
     else
-        usernames="$usernames,$username"   # no space after comma!
+        usernames="$usernames, $username"
     fi
 done
 
-echo "Collected usernames: $usernames"
-
 sudo apt update
 sudo apt-get install -y sssd-ad sssd-tools realmd adcli
-
-sudo realm -v discover "$DOMAIN"
-sudo realm -v join "$DOMAIN" -U "$ADMUSER"
-
-sudo tee /etc/sssd/sssd.conf > /dev/null <<EOF
+sudo realm -v discover $DOMAIN
+sudo realm -v join $DOMAIN -U $ADMUSER
+cat <<EOF > /etc/sssd/sssd.conf
 [sssd]
-domains = {$DOMAIN^^}
+domains = $DOMAIN
 config_file_version = 2
 services = nss, pam
 
-[domain/{$DOMAIN^^}]
+[domain/$DOMAIN]
 default_shell = /bin/bash
 krb5_store_password_if_offline = True
 cache_credentials = True
-krb5_realm = {$DOMAIN^^}
+krb5_realm = $DOMAIN
 realmd_tags = manages-system joined-with-adcli
 id_provider = ad
 fallback_homedir = /home/%u@%d
-ad_domain = {$DOMAIN^^}
+ad_domain = $DOMAIN
 use_fully_qualified_names = False
 ldap_id_mapping = True
 access_provider = simple
@@ -60,4 +51,4 @@ EOF
 
 sudo pam-auth-update --enable mkhomedir
 
-sudo systemctl restart sssd
+systemctl restart sssd && systemctl status sssd
